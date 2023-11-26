@@ -12,6 +12,7 @@ else
 	echo "Please enter the name of the system you are reconciling:" && read -e external_sys
 fi
 
+# Uses the comm utility with output from process substitution to find email addresses, then sorting the emails to be used effectively by comm (which will not run correctly unless data is sorted). The sed utility removes any whitespace that happens to remain, and then that output is redirected to a new .csv file.
 comm -13 <(grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,4\}' "$1" | sort) <(grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,4\}' "$2" | sort) | sed 's/^[[:space:]]*//g' > ""$external_sys"_users_to_remove.csv"
 
 echo "Results have been outputted to "$external_sys"_users_to_remove.csv"""
