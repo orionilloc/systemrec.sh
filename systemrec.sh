@@ -9,7 +9,7 @@ elif [[ ! -f "$1" ]] || [[ ! -f "$2" ]]; then
 elif ! file "$1" | grep -q ".csv" || ! file "$2" | grep -q ".csv"; then
 	echo "ERROR: One or both files are not valid .csv files." && exit 3 
 else
-	echo "Please enter the name of the system you are reconciling:" && read -e external_sys
+	echo "Please enter the name of the system you are reconciling:" && read -e -p external_sys
 fi
 
 # Uses the comm utility with output from process substitution to find email addresses, then sorts the emails to be used effectively by comm (which will not run correctly unless data is sorted). The sed utility removes any remaining whitespace, and then that output is redirected to a new .csv file.
