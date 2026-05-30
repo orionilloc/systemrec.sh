@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This is a script meant for basic system reconciliation when comparing an external system user list (such as Atlassian, 1Password, Bitwarden, Github, etc) against an IdP user list (such as Okta, OneLogin, Google Workspace, or Active Directory). The first argument should be the IdP user list; the second should be the external system user list. Both need to be in .csv format, or the script will not run.
 # The script accepts user-supplied arguments which are declared interally as positional parameters. The script then checks that the file is in a .csv format, before merrily tearing apart the .csv file with some RegEx and sed magic to obtain possibly valid email addresses. It then outputs a list of users to be removed in bulk via an API endpoint.
 
