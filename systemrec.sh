@@ -9,10 +9,23 @@ elif [[ ! -f "$1" ]] || [[ ! -f "$2" ]]; then
 elif ! file "$1" | grep -q ".csv" || ! file "$2" | grep -q ".csv"; then
 	echo "ERROR: One or both files are not valid .csv files." && exit 3 
 else
-	echo "Please enter the name of the system you are reconciling:" && read -e -p external_sys
+	read -r -e -p "Enter the name of the system you are reconciling: " external_sys
+	if [[ ! "$external_sys" =~ ^[A-Za-z0-9_-]+$ ]]; then
+		echo "ERROR: system name may only contain letters, numbers, - and _." >&2 && exit 4
+	fi
 fi
 
 # Uses the comm utility with output from process substitution to find email addresses, then sorts the emails to be used effectively by comm (which will not run correctly unless data is sorted). The sed utility removes any remaining whitespace, and then that output is redirected to a new .csv file.
-comm -13 <(grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,4\}' "$1" | sort) <(grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,4\}' "$2" | sort) | sed 's/^[[:space:]]*//g' > "${external_sys}_users_to_remove.csv"
+extract_emails() {
+    grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,\}' "$1" | tr '[:upper:]' '[:lower:]' | sort -u
+}
+
+idp_emails=$(extract_emails "$1")
+if [[ -z "$idp_emails" ]]; then
+    echo "ERROR: no emails found in $1. Aborting." >&2
+    exit 5
+fi
+
+comm -13 <(printf '%s\n' "$idp_emails") <(extract_emails "$2") > "${external_sys}_users_to_remove.csv"
 
 echo "Results have been written to "${external_sys}_users_to_remove.csv"
