@@ -6,7 +6,7 @@ if [[ -z "$1" ]] || [[ -z "$2" ]]; then
 	echo "ERROR: Not enough user arguments provided." && exit 1
 elif [[ ! -f "$1" ]] || [[ ! -f "$2" ]]; then 
 	echo "ERROR: One or more files do not exist." && exit 2
-elif ! file "$1" | grep -q ".csv" || ! file "$2" | grep -q ".csv"; then
+elif [[ "$1" != *.csv || "$2" != *.csv ]]; then
 	echo "ERROR: One or both files are not valid .csv files." && exit 3 
 else
 	read -r -e -p "Enter the name of the system you are reconciling: " external_sys
@@ -15,7 +15,7 @@ else
 	fi
 fi
 
-# Uses the comm utility with output from process substitution to find email addresses, then sorts the emails to be used effectively by comm (which will not run correctly unless data is sorted). The sed utility removes any remaining whitespace, and then that output is redirected to a new .csv file.
+# Extracts email addresses with grep, lowercases them (comm compares bytes, so John@x.com and john@x.com would otherwise differ), and sorts them uniquely (comm requires sorted input). The script aborts if the IdP list yields no emails; otherwise comm -13 prints addresses present only in the external system, which are written to a new .csv file.
 extract_emails() {
     grep -i -o '[A-Z0-9._%+-]\+@[A-Z0-9.-]\+\.[A-Z]\{2,\}' "$1" | tr '[:upper:]' '[:lower:]' | sort -u
 }
@@ -28,4 +28,4 @@ fi
 
 comm -13 <(printf '%s\n' "$idp_emails") <(extract_emails "$2") > "${external_sys}_users_to_remove.csv"
 
-echo "Results have been written to "${external_sys}_users_to_remove.csv"
+echo "Results have been written to ${external_sys}_users_to_remove.csv"
